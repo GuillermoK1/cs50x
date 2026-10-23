@@ -3,6 +3,8 @@
 import pytest
 
 from job_filter.core.schemas import JobSummary
+from collections.abc import Callable
+from typing import Any
 
 
 @pytest.fixture
@@ -20,3 +22,12 @@ def valid_job() -> JobSummary:
         url="https://example.com/jobs/example-1",
         source="example",
     )
+
+@pytest.fixture
+def make_job(valid_job: JobSummary) -> Callable[..., JobSummary]:
+    """Return a factory that builds valid jobs with field overrides."""
+
+    def _make(**overrides: Any) -> JobSummary:
+        return JobSummary(**(valid_job.model_dump() | overrides))
+
+    return _make

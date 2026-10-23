@@ -21,26 +21,48 @@ async def test_job_summary_can_be_used_in_async_tests(valid_job: JobSummary) -> 
 
 
 @pytest.mark.parametrize(
-    ("field", "value"),
+    ("overrides", "expected_field"),
     [
-        ("title", " "),
-        ("salary_min", -1),
-        ("salary_max", -1),
-        ("salary_min", 90_000),
-        ("url", "not-a-url"),
+        ({"title": " "}, "title"),
+        ({"salary_min": -1, "salary_max": None}, "salary_min"),
+        ({"salary_min": None, "salary_max": -1}, "salary_max"),
+        ({"salary_min": 90_000, "salary_max": 50_000}, None),
+        ({"url": "not-a-url"}, "url"),
     ],
+    ids=["blank-title", "negative-min", "negative-max", "min-greater-than-max", "bad-url"],
 )
 def test_job_summary_rejects_invalid_fields(
     valid_job: JobSummary,
-    field: str,
-    value: str | int,
+    overrides: dict,
+    expected_field: str | None,
 ) -> None:
     """Invalid titles, salaries, and URLs are rejected."""
-    job_data = valid_job.model_dump()
-    job_data[field] = value
+    job_data = valid_job.model_dump() | overrides
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as exc_info:
         JobSummary(**job_data)
+
+    if expected_field is not None:
+        assert any(expected_field in err["loc"] for err in exc_info.value.errors())
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"salary_min": None, "salary_max": None},
+        {"salary_min": 50_000, "salary_max": None},
+        {"salary_min": None, "salary_max": 50_000},
+        {"salary_min": 50_000, "salary_max": 50_000},
+        {"salary_min": 0, "salary_max": 0},
+    ],
+    ids=["no-salary", "only-min", "only-max", "equal", "zero"],
+)
+def test_job_summary_accepts_valid_salary_edge_cases(
+    valid_job: JobSummary,
+    overrides: dict,
+) -> None:
+    """Valid salary combinations, including missing and boundary values, are accepted."""
+    JobSummary(**(valid_job.model_dump() | overrides))
 
 
 # TODO (Phase 2/3): add ScamDetector unit tests when the detector is implemented.
