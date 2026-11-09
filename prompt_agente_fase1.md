@@ -1,47 +1,47 @@
-# Proyecto final CS50x: Filtro genérico de ofertas de empleo
+# CS50x Final Project: Generic Job Listing Filter
 
-## Rol
+## Role
 
-Actúa como un arquitecto de software experto en Python y FastAPI. Vamos a desarrollar el proyecto final de CS50x: un sistema genérico que consume diferentes APIs de empleo mediante el **patrón Adapter** y filtra ofertas sospechosas (estafas u ofertas fantasma).
+Act as a software architect expert in Python and FastAPI. We are going to build the CS50x final project: a generic system that consumes different job APIs through the **Adapter pattern** and filters suspicious listings (scams or ghost jobs).
 
-## Contexto técnico
+## Technical context
 
-- **Python 3.11 o superior.** Usa sintaxis moderna de tipado (`str | None`, `list[str]`, etc.).
-- **Pydantic v2** y `pydantic-settings`.
-- Todo el código debe estar completamente tipado (type hints) y preparado para ser testeado.
-- Los métodos de extracción de datos son **asíncronos** (`async def`).
+- **Python 3.11 or higher.** Use modern typing syntax (`str | None`, `list[str]`, etc.).
+- **Pydantic v2** and `pydantic-settings`.
+- All code must be fully typed (type hints) and ready to be tested.
+- Data extraction methods are **asynchronous** (`async def`).
 
-## Plan por fases (para tu referencia)
+## Phase plan (for your reference)
 
-| Fase | Contenido |
-|------|-----------|
-| 1 | Arquitectura base y modelos de datos (**esta es la fase actual**) |
-| 2 | Adaptadores concretos (`AdzunaProvider`, `MockProvider`) y módulo `ScamDetector` |
-| 3 | Tests con pytest + pytest-asyncio; simulación de HTTP con `respx` |
-| 4 | Capa de API (FastAPI) y persistencia (SQLite) |
-| 5 | Interfaz (Jinja2) y entrega (README y vídeo) |
+| Phase | Content |
+|-------|---------|
+| 1 | Base architecture and data models (**this is the current phase**) |
+| 2 | Concrete adapters (`AdzunaProvider`, `MockProvider`) and `ScamDetector` module |
+| 3 | Tests with pytest + pytest-asyncio; HTTP simulation with `respx` |
+| 4 | API layer (FastAPI) and persistence (SQLite) |
+| 5 | Interface (Jinja2) and delivery (README and video) |
 
-## Alcance de ESTA conversación
+## Scope of THIS conversation
 
-Trabajamos **exclusivamente en la Fase 1** y dejamos preparado el entorno para la Fase 3.
+We work **exclusively on Phase 1** and prepare the environment for Phase 3.
 
-**No implementes todavía:** rutas de FastAPI, base de datos, adaptadores concretos ni el `ScamDetector`.
+**Do not implement yet:** FastAPI routes, database, concrete adapters or the `ScamDetector`.
 
-## Qué debes generar
+## What you must produce
 
-### 1. Estructura de carpetas
+### 1. Folder structure
 
-Propón un árbol de carpetas profesional que incluya como mínimo `adapters/`, `core/`, `api/` y `tests/`. Incluye también:
+Propose a professional folder tree that includes at least `adapters/`, `core/`, `api/` and `tests/`. Also include:
 
-- Los archivos `__init__.py` necesarios.
-- `.env.example` y `.gitignore`.
-- `pyproject.toml` con la configuración de pytest (ver punto 5).
+- The necessary `__init__.py` files.
+- `.env.example` and `.gitignore`.
+- `pyproject.toml` with the pytest configuration (see point 5).
 
-Explica en una línea el propósito de cada carpeta.
+Explain the purpose of each folder in one line.
 
 ### 2. `requirements.txt`
 
-Debe incluir:
+It must include:
 
 - `fastapi`
 - `uvicorn`
@@ -50,56 +50,56 @@ Debe incluir:
 - `httpx`
 - `pytest`
 - `pytest-asyncio`
-- `respx` (para simular llamadas `httpx` en los tests; **no** uses `responses`, que solo funciona con `requests`)
+- `respx` (to mock `httpx` calls in tests; do **not** use `responses`, which only works with `requests`)
 
 ### 3. `core/config.py`
 
-Configuración con `pydantic-settings` (`BaseSettings`) que lea variables desde `.env`. Incluye campos de ejemplo para credenciales de una API externa (por ejemplo `adzuna_app_id` y `adzuna_app_key`) con valores opcionales o por defecto seguros. Entrega también el `.env.example` correspondiente.
+Configuration with `pydantic-settings` (`BaseSettings`) that reads variables from `.env`. Include example fields for the credentials of an external API (for example `adzuna_app_id` and `adzuna_app_key`) with optional or safe default values. Also deliver the matching `.env.example`.
 
 ### 4. `core/schemas.py`
 
-Modelo unificado de oferta de empleo llamado **`JobSummary`** (usa siempre este nombre; no `JobSchema`), con Pydantic v2.
+Unified job listing model called **`JobSummary`** (always use this name; not `JobSchema`), with Pydantic v2.
 
-Campos sugeridos: `id`, `title`, `company`, `description`, `location`, `salary_min`, `salary_max`, `currency`, `url`, `posted_at`, `source` (nombre del proveedor).
+Suggested fields: `id`, `title`, `company`, `description`, `location`, `salary_min`, `salary_max`, `currency`, `url`, `posted_at`, `source` (provider name).
 
-Validaciones mínimas:
+Minimum validations:
 
-- `salary_min` y `salary_max` no pueden ser negativos si existen.
-- Si ambos existen, `salary_min <= salary_max`.
-- `title` no puede estar vacío.
-- `url` debe ser una URL válida.
+- `salary_min` and `salary_max` cannot be negative if present.
+- If both are present, `salary_min <= salary_max`.
+- `title` cannot be empty.
+- `url` must be a valid URL.
 
-Usa `field_validator` / `model_validator` de Pydantic v2.
+Use Pydantic v2 `field_validator` / `model_validator`.
 
-Los modelos de **entrada nativa** de cada API (el formato crudo de Adzuna, etc.) irán dentro de cada adaptador en la Fase 2. Indica en un comentario o docstring que el adaptador será el responsable de traducir el formato nativo a `JobSummary`.
+The **native input** models of each API (Adzuna's raw format, etc.) will live inside each adapter in Phase 2. State in a comment or docstring that the adapter will be responsible for translating the native format into `JobSummary`.
 
 ### 5. `adapters/base.py`
 
-Clase abstracta `JobProvider` usando el módulo `abc` (`ABC` y `@abstractmethod`):
+Abstract class `JobProvider` using the `abc` module (`ABC` and `@abstractmethod`):
 
-- Un método `async def fetch_jobs(self, query: str, ...) -> list[JobSummary]` abstracto.
-- Un atributo o propiedad abstracta `name` que identifique al proveedor.
-- Docstrings claros que expliquen el contrato que debe cumplir cada adaptador.
+- An abstract `async def fetch_jobs(self, query: str, ...) -> list[JobSummary]` method.
+- An abstract attribute or property `name` that identifies the provider.
+- Clear docstrings explaining the contract each adapter must fulfill.
 
-### 6. Entorno de pytest
+### 6. Pytest environment
 
-- `pyproject.toml` con la sección `[tool.pytest.ini_options]` que incluya `asyncio_mode = "auto"` y `testpaths = ["tests"]`.
-- `tests/conftest.py` con un fixture de ejemplo que devuelva un `JobSummary` válido.
-- `tests/test_filters.py` como esqueleto: un test síncrono y un test `async` de ejemplo (pueden validar `JobSummary`), más comentarios `# TODO` indicando dónde irán los tests del `ScamDetector` en la Fase 2/3.
+- `pyproject.toml` with the `[tool.pytest.ini_options]` section including `asyncio_mode = "auto"` and `testpaths = ["tests"]`.
+- `tests/conftest.py` with an example fixture that returns a valid `JobSummary`.
+- `tests/test_filters.py` as a skeleton: one synchronous test and one example `async` test (they can validate `JobSummary`), plus `# TODO` comments indicating where the `ScamDetector` tests will go in Phase 2/3.
 
-## Criterios de calidad
+## Quality criteria
 
-- Código limpio, sin lógica innecesaria y con nombres descriptivos.
-- Docstrings breves y type hints en todas las funciones y métodos.
-- Cada archivo debe presentarse con su ruta completa en un bloque de código separado.
-- Al final, indica cómo instalar dependencias y ejecutar `pytest` para comprobar que el esqueleto funciona.
+- Clean code, no unnecessary logic and descriptive names.
+- Brief docstrings and type hints on all functions and methods.
+- Each file must be presented with its full path in a separate code block.
+- At the end, explain how to install dependencies and run `pytest` to check that the skeleton works.
 
-## Notas para fases posteriores (no actuar todavía)
+## Notes for later phases (do not act yet)
 
-- Persistencia: preferir SQLAlchemy 2.0 con `aiosqlite`, ya que `cs50.SQL` es síncrona y bloquea el event loop en rutas `async`.
-- Endpoint de búsqueda previsto: `GET /jobs/search?query=python&exclude_scams=true`.
-- Jinja2 requiere instalar `jinja2` por separado (Fase 5).
-- Las reglas heurísticas del detector producirán falsos positivos; debe documentarse como limitación en el README.
-- Requisitos de entrega de CS50x (verificar en la web del curso, pueden cambiar): README de al menos 750 palabras y vídeo de máximo 3 minutos.
+- Persistence: prefer SQLAlchemy 2.0 with `aiosqlite`, since `cs50.SQL` is synchronous and blocks the event loop in `async` routes.
+- Planned search endpoint: `GET /jobs/search?query=python&exclude_scams=true`.
+- Jinja2 requires installing `jinja2` separately (Phase 5).
+- The detector's heuristic rules will produce false positives; this must be documented as a limitation in the README.
+- CS50x submission requirements (verify on the course website, they may change): README of at least 750 words and a video of at most 3 minutes.
 
-Antes de generar el código, resume en 3 o 4 líneas cómo entiendes el alcance. Si algo es ambiguo, haz como máximo una pregunta.
+Before generating code, summarize in 3 or 4 lines how you understand the scope. If anything is ambiguous, ask at most one question.
