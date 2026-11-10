@@ -7,3 +7,5 @@ pytest
 pytest-asyncio
 respx
 pytest-cov
+sqlalchemy[asyncio]
+aiosqlite

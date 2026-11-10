@@ -8,7 +8,8 @@ import httpx
 import pytest
 import respx
 
-from job_filter.adapters.adzuna import AdzunaProvider, ProviderError
+from job_filter.adapters.adzuna import AdzunaProvider
+from job_filter.adapters.base import ProviderError
 from job_filter.adapters.base import JobProvider
 from job_filter.adapters.mock import MockProvider
 from job_filter.core.scam_detector import ScamDetector

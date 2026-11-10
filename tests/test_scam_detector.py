@@ -160,12 +160,23 @@ def test_filter_removes_suspicious_jobs(detector: ScamDetector, make_job: MakeJo
 
 
 async def test_detector_flags_mock_scams() -> None:
-    detector = ScamDetector(now=lambda: datetime(2025, 1, 20, tzinfo=timezone.utc))
+    detector = ScamDetector()  # mock dates are relative to the real clock
     jobs = await MockProvider().fetch_jobs("")
     flagged = {job.id for job in jobs if detector.analyze(job).flags}
     clean = {job.id for job in jobs} - flagged
     assert clean == {"mock-1", "mock-2", "mock-3"}
     assert {f.code for job in jobs for f in detector.analyze(job).flags} == set(DEFAULT_WEIGHTS)
+
+
+def test_analyze_many_keeps_order_and_reports(detector: ScamDetector, make_job: MakeJob) -> None:
+    jobs = [
+        make_job(id="good", description=GOOD_DESC, posted_at=NOW),
+        make_job(id="bad", description="upfront payment via WhatsApp", posted_at=NOW),
+    ]
+    reports = detector.analyze_many(jobs)
+    assert [r.job_id for r in reports] == ["good", "bad"]
+    assert not reports[0].is_suspicious and reports[1].is_suspicious
+    assert detector.analyze_many([]) == []
 
 
 # --- Phase 3: gap and edge-case tests ---

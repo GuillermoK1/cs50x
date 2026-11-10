@@ -242,6 +242,10 @@ class ScamDetector:
             is_suspicious=score >= self.threshold,
         )
 
+    def analyze_many(self, jobs: list[JobSummary]) -> list[ScamReport]:
+        """Analyze each job and return the reports in the same order."""
+        return [self.analyze(job) for job in jobs]
+
     def filter(self, jobs: list[JobSummary]) -> list[JobSummary]:
         """Return only the jobs that are not suspicious."""
         return [job for job in jobs if not self.analyze(job).is_suspicious]

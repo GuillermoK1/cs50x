@@ -5,6 +5,10 @@ from abc import ABC, abstractmethod
 from job_filter.core.schemas import JobSummary
 
 
+class ProviderError(Exception):
+    """Raised when a provider fails (network, HTTP status, bad payload, config)."""
+
+
 class JobProvider(ABC):
     """Define the interface that each job-provider adapter must implement.
 

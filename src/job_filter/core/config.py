@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     adzuna_app_id: str | None = None
     adzuna_app_key: SecretStr | None = None
     adzuna_country: str = "es"
+    database_url: str = "sqlite+aiosqlite:///./jobs.db"
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -6,15 +6,11 @@ from typing import Any
 import httpx
 from pydantic import BaseModel, ValidationError, field_validator
 
-from job_filter.adapters.base import JobProvider
+from job_filter.adapters.base import JobProvider, ProviderError
 from job_filter.core.config import settings
 from job_filter.core.schemas import JobSummary
 
 BASE_URL = "https://api.adzuna.com/v1/api/jobs"
-
-
-class ProviderError(Exception):
-    """Raised when a provider fails (network, HTTP status, bad payload, config)."""
 
 
 class AdzunaNamed(BaseModel):

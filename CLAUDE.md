@@ -8,7 +8,7 @@ Consumes job APIs via the Adapter pattern and filters suspicious listings (scams
 - Short docstrings, descriptive names, no unnecessary logic.
 
 ## Layout
-- `src/job_filter/{adapters,core,api,tests}`
+- `src/job_filter/{adapters,core,api}`; tests live in `tests/` at the repo root
 
 ## Architecture
 - Adapter pattern: `JobProvider` ABC in `adapters/base.py`.
@@ -37,3 +37,6 @@ Consumes job APIs via the Adapter pattern and filters suspicious listings (scams
 ## Running tests
 - Default (offline, coverage >= 95% enforced via addopts): `python -m pytest`
 - Live Adzuna test (needs `.env` keys, skips otherwise): `python -m pytest -m live -o addopts="" -s`
+
+## Run server
+- `uvicorn job_filter.api.main:app --app-dir src --reload` then `GET /jobs/search?query=python&exclude_scams=true` (creates `jobs.db`).

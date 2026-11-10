@@ -1,7 +1,6 @@
 """Tests for MockProvider."""
 
 from collections.abc import Callable
-from datetime import datetime, timezone
 
 import pytest
 
@@ -54,7 +53,7 @@ async def test_mock_pages_do_not_overlap() -> None:
 
 
 async def test_detector_filters_mock_scams_and_keeps_clean_jobs() -> None:
-    detector = ScamDetector(now=lambda: datetime(2025, 1, 15, tzinfo=timezone.utc))
+    detector = ScamDetector()  # mock dates are relative to the real clock
     jobs = await MockProvider().fetch_jobs("")
     kept = {job.id for job in detector.filter(jobs)}
     assert {"mock-1", "mock-2", "mock-3"} <= kept

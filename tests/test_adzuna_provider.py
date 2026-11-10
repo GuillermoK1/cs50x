@@ -7,7 +7,8 @@ import httpx
 import pytest
 import respx
 
-from job_filter.adapters.adzuna import AdzunaProvider, ProviderError
+from job_filter.adapters.adzuna import AdzunaProvider
+from job_filter.adapters.base import ProviderError
 
 FIXTURE = Path(__file__).parent / "fixtures" / "adzuna_search.json"
 URL = "https://api.adzuna.com/v1/api/jobs/es/search/1"

@@ -1,12 +1,13 @@
 """Deterministic in-memory provider used for tests and demos."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from job_filter.adapters.base import JobProvider
 from job_filter.core.schemas import JobSummary
 
-_RECENT = datetime(2025, 1, 10, tzinfo=timezone.utc)
-_OLD = datetime(2023, 1, 10, tzinfo=timezone.utc)
+_NOW = datetime.now(timezone.utc)
+_RECENT = _NOW - timedelta(days=5)
+_OLD = _NOW - timedelta(days=400)
 
 _GOOD_DESCRIPTION = (
     "We are looking for an engineer to design, build and maintain services "
