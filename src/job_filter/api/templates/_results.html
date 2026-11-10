@@ -1,0 +1,30 @@
+{% for result in results %}
+<article class="card">
+  <h2>
+    {% if is_safe_url(result.url) %}
+    <a href="{{ result.url }}" target="_blank" rel="noopener noreferrer nofollow">{{ result.title }}</a>
+    {% else %}
+    {{ result.title }}
+    {% endif %}
+    <span class="badge {{ badge_class(result) }}">Score {{ result.scam_score }}</span>
+  </h2>
+  <p class="meta">{{ result.company }}{% if result.location %} &middot; {{ result.location }}{% endif %}</p>
+  {% set salary = format_salary(result) %}
+  {% if salary %}
+  <p class="meta">Salary: {{ salary }}{% if result.salary_is_predicted %} (predicted){% endif %}</p>
+  {% endif %}
+  {% if result.posted_at %}
+  <p class="meta">Posted: {{ result.posted_at.strftime("%Y-%m-%d") }}</p>
+  {% endif %}
+  {% if result.description_truncated %}
+  <p class="note">The provider truncated this description, so the analysis may be incomplete.</p>
+  {% endif %}
+  {% if result.flags %}
+  <ul class="flags">
+    {% for flag in result.flags %}
+    <li><code>{{ flag.code }}</code>: {{ flag.reason }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</article>
+{% endfor %}

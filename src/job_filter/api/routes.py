@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from job_filter.adapters.base import JobProvider, ProviderError
 from job_filter.api.dependencies import get_detector, get_provider, get_repository
 from job_filter.api.schemas import JobResult
+from job_filter.api.search import provider_error_message, run_search
 from job_filter.core.repository import JobRepository
 from job_filter.core.scam_detector import ScamDetector
 
@@ -26,22 +27,15 @@ async def search_jobs(
 ) -> list[JobResult]:
     """Fetch jobs, score and store all of them, then return them (optionally without scams)."""
     try:
-        jobs = await provider.fetch_jobs(query, location=location, page=page, limit=limit)
-    except ProviderError as exc:
-        raise HTTPException(
-            status_code=502, detail=f"Job provider '{provider.name}' failed: {exc}"
-        ) from exc
-
-    reports = detector.analyze_many(jobs)
-    await repository.save_results(jobs, reports)
-
-    return [
-        JobResult(
-            **job.model_dump(),
-            scam_score=report.score,
-            is_suspicious=report.is_suspicious,
-            flags=report.flags,
+        return await run_search(
+            provider,
+            detector,
+            repository,
+            query=query,
+            location=location,
+            page=page,
+            limit=limit,
+            exclude_scams=exclude_scams,
         )
-        for job, report in zip(jobs, reports, strict=True)
-        if not (exclude_scams and report.is_suspicious)
-    ]
+    except ProviderError as exc:
+        raise HTTPException(status_code=502, detail=provider_error_message(provider, exc)) from exc

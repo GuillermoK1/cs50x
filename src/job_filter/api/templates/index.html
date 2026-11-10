@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="get" action="/">
+  <label>Query
+    <input type="text" name="query" value="{{ query }}" required>
+  </label>
+  <label>Source
+    <select name="source">
+      {% for name in sources %}
+      <option value="{{ name }}" {% if name == source %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Location
+    <input type="text" name="location" placeholder="Remote/A city/Empty field" value="{{ location }}">
+  </label>
+  <label class="inline">
+    <input type="checkbox" name="exclude_scams" {% if exclude_scams %}checked{% endif %}>
+    Exclude suspicious jobs
+  </label>
+  <button type="submit">Search</button>
+</form>
+
+{% if error %}
+<p class="message error" role="alert">{{ error }}</p>
+{% elif searched and not results %}
+<p class="message info">No jobs found.</p>
+{% elif results %}
+{% include "_results.html" %}
+{% endif %}
+{% endblock %}

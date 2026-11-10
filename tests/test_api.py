@@ -17,7 +17,7 @@ from job_filter.core.models import JobRow
 from job_filter.core.scam_detector import ScamDetector
 from job_filter.core.schemas import JobSummary
 
-# With the real clock (mock dates are relative to import time), query "e" matches all 9 mock jobs
+# With the real clock (mock dates are relative to call time), query "e" matches all 9 mock jobs
 # and only mock-5 and mock-6 reach the suspicious threshold.
 SUSPICIOUS_IDS = {"mock-5", "mock-6"}
 

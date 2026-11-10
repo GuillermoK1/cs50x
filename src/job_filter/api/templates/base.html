@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Job Listing Filter{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; color: #1f2933; }
+    h1 { margin-bottom: 0.25rem; }
+    .subtitle { color: #52606d; margin-top: 0; }
+    form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin: 1.5rem 0; }
+    label { display: flex; flex-direction: column; font-size: 0.85rem; gap: 0.25rem; }
+    label.inline { flex-direction: row; align-items: center; gap: 0.4rem; }
+    input[type=text], select { padding: 0.4rem; font-size: 1rem; }
+    button { padding: 0.5rem 1.2rem; font-size: 1rem; cursor: pointer; }
+    .card { border: 1px solid #cbd2d9; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+    .card h2 { margin: 0 0 0.25rem; font-size: 1.15rem; }
+    .meta { color: #52606d; font-size: 0.9rem; margin: 0.15rem 0; }
+    .badge { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; color: #fff; }
+    .badge.green { background: #2f855a; }
+    .badge.amber { background: #b7791f; }
+    .badge.red { background: #c53030; }
+    .flags { margin: 0.5rem 0 0; padding-left: 1.2rem; font-size: 0.9rem; }
+    .note { font-size: 0.85rem; color: #7b8794; font-style: italic; }
+    .message { padding: 0.75rem 1rem; border-radius: 6px; }
+    .message.error { background: #fed7d7; color: #742a2a; }
+    .message.info { background: #e6f0fa; color: #1a365d; }
+  </style>
+</head>
+<body>
+  <h1>Job Listing Filter</h1>
+  <p class="subtitle">Search job listings and flag suspicious ones (scams, ghost jobs).</p>
+  {% block content %}{% endblock %}
+</body>
+</html>

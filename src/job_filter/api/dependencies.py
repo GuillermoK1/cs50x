@@ -1,6 +1,7 @@
 """FastAPI dependencies (overridable in tests)."""
 
-from typing import Annotated, Literal
+from collections.abc import Callable
+from typing import Annotated, Literal, TypeGuard, get_args
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,11 +14,25 @@ from job_filter.core.repository import JobRepository
 from job_filter.core.scam_detector import ScamDetector
 
 
-def get_provider(source: Literal["mock", "adzuna"] = "mock") -> JobProvider:
+Source = Literal["mock", "adzuna"]
+SOURCES: tuple[Source, ...] = get_args(Source)
+
+
+def is_source(value: str) -> TypeGuard[Source]:
+    """True when ``value`` is a supported source name."""
+    return value in SOURCES
+
+
+def get_provider(source: Source = "mock") -> JobProvider:
     """Build the provider for ``source``; Adzuna only when requested."""
     if source == "adzuna":
         return AdzunaProvider()
     return MockProvider()
+
+
+def get_provider_factory() -> Callable[[Source], JobProvider]:
+    """Return the provider builder, for routes that validate ``source`` themselves."""
+    return get_provider
 
 
 def get_detector() -> ScamDetector:

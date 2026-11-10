@@ -9,3 +9,4 @@ respx
 pytest-cov
 sqlalchemy[asyncio]
 aiosqlite
+jinja2

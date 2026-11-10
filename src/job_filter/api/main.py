@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from job_filter.api.routes import router
+from job_filter.api.web import router as web_router
 from job_filter.core.database import engine, init_db
 
 
@@ -19,6 +20,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="Job Listing Filter", lifespan=lifespan)
 app.include_router(router)
+app.include_router(web_router)
 
 
 @app.get("/health")
