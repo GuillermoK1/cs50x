@@ -166,3 +166,82 @@ async def test_detector_flags_mock_scams() -> None:
     clean = {job.id for job in jobs} - flagged
     assert clean == {"mock-1", "mock-2", "mock-3"}
     assert {f.code for job in jobs for f in detector.analyze(job).flags} == set(DEFAULT_WEIGHTS)
+
+
+# --- Phase 3: gap and edge-case tests ---
+
+
+@pytest.mark.parametrize(
+    ("posted_at", "now", "old"),
+    [
+        (datetime(2024, 12, 1), datetime(2025, 3, 1), True),
+        (datetime(2024, 12, 1), datetime(2025, 3, 1, tzinfo=timezone.utc), True),
+        (datetime(2025, 2, 20, tzinfo=timezone.utc), datetime(2025, 3, 1), False),
+        (datetime(2024, 12, 1, tzinfo=timezone.utc), datetime(2025, 3, 1), True),
+    ],
+    ids=["both-naive", "naive-posted-aware-now", "aware-posted-naive-now-recent", "aware-posted-naive-now-old"],
+)
+def test_old_listing_mixes_naive_and_aware(
+    make_job: MakeJob, posted_at: datetime, now: datetime, old: bool
+) -> None:
+    detector = ScamDetector(now=lambda: now)
+    report = detector.analyze(make_job(description=GOOD_DESC, posted_at=posted_at))
+    assert ("old_listing" in {f.code for f in report.flags}) is old
+
+
+def test_old_listing_boundary_is_exclusive(make_job: MakeJob) -> None:
+    detector = ScamDetector(now=lambda: NOW)
+    at_limit = make_job(description=GOOD_DESC, posted_at=NOW - timedelta(days=60))
+    assert detector.analyze(at_limit).flags == []
+
+
+def test_default_clock_is_used_when_now_not_injected(make_job: MakeJob) -> None:
+    job = make_job(description=GOOD_DESC, posted_at=datetime(2000, 1, 1, tzinfo=timezone.utc))
+    assert "old_listing" in {f.code for f in ScamDetector().analyze(job).flags}
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["GUARANTEED EARNINGS!", "Sin Experiencia necesaria", "INVERSIÓN INICIAL", "Western Union", "BITCOIN"],
+    ids=["en-upper", "es-mixed", "es-accent-upper", "en-mixed", "en-single-word"],
+)
+def test_keywords_are_case_insensitive(detector: ScamDetector, make_job: MakeJob, text: str) -> None:
+    report = detector.analyze(make_job(description=f"{GOOD_DESC} {text}", posted_at=NOW))
+    assert "scam_keywords" in {f.code for f in report.flags}
+
+
+def test_keyword_without_accent_matches_spanish_variant(
+    detector: ScamDetector, make_job: MakeJob
+) -> None:
+    report = detector.analyze(make_job(description=GOOD_DESC + " inversion inicial", posted_at=NOW))
+    assert "scam_keywords" in {f.code for f in report.flags}
+
+
+def test_rules_combine_on_same_job(detector: ScamDetector, make_job: MakeJob) -> None:
+    job = make_job(
+        description=GOOD_DESC + " Pago por adelantado, escribe por Telegram",
+        company="Confidencial",
+        posted_at=NOW,
+    )
+    report = detector.analyze(job)
+    assert {f.code for f in report.flags} == {"scam_keywords", "off_platform_contact", "missing_company"}
+    assert report.score == 40 + 30 + 15
+
+
+def test_score_exactly_at_default_threshold_is_suspicious(make_job: MakeJob) -> None:
+    detector = ScamDetector(threshold=50, weights={"missing_company": 50}, now=lambda: NOW)
+    job = make_job(company="Confidential", description=GOOD_DESC, posted_at=NOW)
+    report = detector.analyze(job)
+    assert report.score == 50 and report.is_suspicious
+
+
+def test_filter_empty_list(detector: ScamDetector) -> None:
+    assert detector.filter([]) == []
+
+
+def test_filter_all_suspicious(detector: ScamDetector, make_job: MakeJob) -> None:
+    jobs = [
+        make_job(id=str(i), description="upfront payment via WhatsApp", posted_at=NOW)
+        for i in range(3)
+    ]
+    assert detector.filter(jobs) == []

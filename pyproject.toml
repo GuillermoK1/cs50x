@@ -2,3 +2,14 @@
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["src"]
+addopts = "-m 'not live' --cov --cov-report=term-missing --cov-fail-under=95"
+markers = [
+    "live: calls the real Adzuna API (needs credentials in .env); excluded by default",
+]
+
+[tool.coverage.run]
+source = ["src/job_filter"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true

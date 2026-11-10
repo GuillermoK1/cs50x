@@ -33,3 +33,7 @@ Consumes job APIs via the Adapter pattern and filters suspicious listings (scams
 - Jinja2 is installed separately.
 - CS50x delivery: README >= 750 words, video <= 3 min (verify on the CS50x site).
 - README limitations to mention: detector false positives and Adzuna truncated text.
+
+## Running tests
+- Default (offline, coverage >= 95% enforced via addopts): `python -m pytest`
+- Live Adzuna test (needs `.env` keys, skips otherwise): `python -m pytest -m live -o addopts="" -s`

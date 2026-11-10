@@ -131,3 +131,62 @@ async def test_injected_client_is_not_closed() -> None:
     async with httpx.AsyncClient() as client:
         await _provider(client=client).fetch_jobs("python")
         assert not client.is_closed
+
+
+# --- Phase 3: gap tests ---
+
+
+def test_provider_name() -> None:
+    assert _provider().name == "adzuna"
+
+
+@respx.mock
+async def test_page_goes_in_path_and_limit_is_results_per_page() -> None:
+    route = respx.get("https://api.adzuna.com/v1/api/jobs/es/search/3").respond(json={"results": []})
+    await _provider().fetch_jobs("python", page=3, limit=7, location="Sevilla")
+    request = route.calls.last.request
+    assert request.url.path.endswith("/search/3")
+    assert request.url.params["results_per_page"] == "7"
+    assert request.url.params["where"] == "Sevilla"
+
+
+@respx.mock
+async def test_timeout_is_wrapped() -> None:
+    respx.get(URL).mock(side_effect=httpx.ReadTimeout("slow"))
+    with pytest.raises(ProviderError, match="ReadTimeout"):
+        await _provider().fetch_jobs("python")
+
+
+@respx.mock
+async def test_internal_client_is_closed(monkeypatch: pytest.MonkeyPatch) -> None:
+    created: list[httpx.AsyncClient] = []
+    original = httpx.AsyncClient
+
+    def tracking_client(*args: object, **kwargs: object) -> httpx.AsyncClient:
+        client = original(*args, **kwargs)  # type: ignore[arg-type]
+        created.append(client)
+        return client
+
+    monkeypatch.setattr(httpx, "AsyncClient", tracking_client)
+    respx.get(URL).respond(json={"results": []})
+    await _provider().fetch_jobs("python")
+    assert len(created) == 1 and created[0].is_closed
+
+
+@respx.mock
+async def test_null_predicted_flag_defaults_to_false() -> None:
+    offer = {"id": "1", "title": "T", "redirect_url": "https://x.example/1", "salary_is_predicted": None}
+    respx.get(URL).respond(json={"results": [offer]})
+    assert (await _provider().fetch_jobs("t"))[0].salary_is_predicted is False
+
+
+@respx.mock
+async def test_offer_failing_jobsummary_validation_is_skipped() -> None:
+    good = {"id": "1", "title": "Ok", "redirect_url": "https://x.example/1"}
+    bad_url = {"id": "2", "title": "Bad", "redirect_url": "not-a-url"}
+    inverted = {
+        "id": "3", "title": "Inv", "redirect_url": "https://x.example/3",
+        "salary_min": 9, "salary_max": 1,
+    }
+    respx.get(URL).respond(json={"results": [bad_url, good, inverted]})
+    assert [j.id for j in await _provider().fetch_jobs("t")] == ["1"]

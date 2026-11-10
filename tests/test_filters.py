@@ -66,3 +66,28 @@ def test_job_summary_accepts_valid_salary_edge_cases(
 
 
 # TODO (Phase 2/3): add ScamDetector unit tests when the detector is implemented.
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"title": "\t\n "},
+        {"url": "ftp://example.com/job"},
+        {"url": "javascript:alert(1)"},
+        {"url": "example.com/job"},
+        {"url": ""},
+    ],
+    ids=["whitespace-title", "ftp-scheme", "javascript-scheme", "no-scheme", "empty-url"],
+)
+def test_job_summary_rejects_more_invalid_values(valid_job: JobSummary, overrides: dict) -> None:
+    """Whitespace-only titles and non-http(s) URLs are rejected."""
+    with pytest.raises(ValidationError):
+        JobSummary(**(valid_job.model_dump() | overrides))
+
+
+@pytest.mark.parametrize(
+    "url", ["http://example.com/a", "https://example.com/a?x=1"], ids=["http", "https-query"]
+)
+def test_job_summary_accepts_http_and_https(valid_job: JobSummary, url: str) -> None:
+    """Both http and https URLs are accepted."""
+    assert JobSummary(**(valid_job.model_dump() | {"url": url})).url is not None
