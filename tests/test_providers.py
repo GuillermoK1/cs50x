@@ -17,7 +17,14 @@ async def test_minimal_job_provider_subclass_can_be_instantiated_and_fetch_jobs(
         def name(self) -> str:
             return "minimal"
 
-        async def fetch_jobs(self, query: str) -> list[JobSummary]:
+        async def fetch_jobs(
+            self,
+            query: str,
+            *,
+            location: str | None = None,
+            page: int = 1,
+            limit: int = 20,
+        ) -> list[JobSummary]:
             return []
 
     provider = MinimalJobProvider()

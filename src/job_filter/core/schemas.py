@@ -23,6 +23,8 @@ class JobSummary(BaseModel):
     url: HttpUrl
     posted_at: datetime | None = None
     source: str
+    salary_is_predicted: bool = False
+    description_truncated: bool = False
 
     @field_validator("title")
     @classmethod

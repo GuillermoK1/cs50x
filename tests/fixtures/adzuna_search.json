@@ -1,0 +1,39 @@
+{
+  "count": 4,
+  "results": [
+    {
+      "id": "1001",
+      "title": "Python Developer",
+      "description": "Build services in Python for a growing team...",
+      "created": "2025-01-08T10:00:00Z",
+      "redirect_url": "https://www.adzuna.es/land/ad/1001",
+      "salary_min": 40000,
+      "salary_max": 55000,
+      "salary_is_predicted": "0",
+      "company": {"display_name": "Acme Software"},
+      "location": {"display_name": "Madrid"}
+    },
+    {
+      "id": 1002,
+      "title": "Data Analyst",
+      "redirect_url": "https://www.adzuna.es/land/ad/1002"
+    },
+    {
+      "id": "1003",
+      "title": "Backend Engineer",
+      "description": "Work on APIs...",
+      "created": "2025-01-09T09:30:00Z",
+      "redirect_url": "https://www.adzuna.es/land/ad/1003",
+      "salary_min": 30000,
+      "salary_max": 45000,
+      "salary_is_predicted": "1",
+      "company": {"display_name": "Cloudify"},
+      "location": {"display_name": "Barcelona"}
+    },
+    {
+      "id": "1004",
+      "title": "Offer without link",
+      "company": {"display_name": "NoUrl SL"}
+    }
+  ]
+}

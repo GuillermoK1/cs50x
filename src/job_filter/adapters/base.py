@@ -18,8 +18,19 @@ class JobProvider(ABC):
         """Return the identifier used for this provider's jobs."""
 
     @abstractmethod
-    async def fetch_jobs(self, query: str) -> list[JobSummary]:
+    async def fetch_jobs(
+        self,
+        query: str,
+        *,
+        location: str | None = None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> list[JobSummary]:
         """Fetch jobs matching ``query`` and normalize them to ``JobSummary``.
+
+        ``location`` optionally narrows results, ``page`` starts at 1 and
+        ``limit`` caps the jobs returned per page. Provider-specific settings
+        (country, credentials) belong in the adapter constructor.
 
         Implementations should perform asynchronous I/O and return an empty
         list when the provider has no matching jobs.
