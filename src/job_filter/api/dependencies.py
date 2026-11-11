@@ -25,6 +25,7 @@ def is_source(value: str) -> TypeGuard[Source]:
 
 def get_provider(source: Source = "mock") -> JobProvider:
     """Build the provider for ``source``; Adzuna only when requested."""
+    # Adzuna is built lazily so the mock path never needs API credentials.
     if source == "adzuna":
         return AdzunaProvider()
     return MockProvider()
@@ -32,6 +33,7 @@ def get_provider(source: Source = "mock") -> JobProvider:
 
 def get_provider_factory() -> Callable[[Source], JobProvider]:
     """Return the provider builder, for routes that validate ``source`` themselves."""
+    # Lets the HTML route return a 400 for a bad source instead of FastAPI's 422.
     return get_provider
 
 

@@ -97,11 +97,14 @@ class AdzunaProvider(JobProvider):
             "results_per_page": limit,
         }
         if location:
+            # Adzuna's "where" is searched within the configured ADZUNA_COUNTRY only.
             params["where"] = location
         if self._max_days_old is not None:
             params["max_days_old"] = self._max_days_old
+        # Country and page are part of the URL path, not query params.
         url = f"{BASE_URL}/{self._country}/search/{page}"
 
+        # Wrap all network/HTTP/JSON failures in ProviderError so callers handle one type.
         try:
             if self._client is not None:
                 response = await self._client.get(url, params=params)
@@ -118,6 +121,7 @@ class AdzunaProvider(JobProvider):
         except (ValueError, ValidationError) as exc:
             raise ProviderError("Adzuna returned malformed or unexpected JSON.") from exc
 
+        # Native Adzuna models are translated to JobSummary; unusable offers are dropped.
         jobs = (self._translate(item) for item in parsed.results)
         return [job for job in jobs if job is not None]
 

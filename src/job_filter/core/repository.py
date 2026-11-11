@@ -70,7 +70,9 @@ class JobRepository:
     async def save_results(self, jobs: list[JobSummary], reports: list[ScamReport]) -> None:
         """Upsert each job with its report (by source + id) and commit."""
         for job, report in zip(jobs, reports, strict=True):
+            # merge = upsert by primary key (source, id), so repeated searches don't duplicate rows.
             await self._session.merge(_to_row(job, report))
+        # One commit for the whole batch.
         await self._session.commit()
 
     async def list_jobs(

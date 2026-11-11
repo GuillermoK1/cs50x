@@ -5,15 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Job Listing Filter{% endblock %}</title>
   <style>
+    html { background: #fff; }
     body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; color: #1f2933; }
-    h1 { margin-bottom: 0.25rem; }
-    .subtitle { color: #52606d; margin-top: 0; }
-    form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin: 1.5rem 0; }
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1; opacity: 0.5; pointer-events: none;
+      background: url('/static/bg-job-search.jpg') center / cover no-repeat;
+    }
+    @media (max-width: 600px) { body::before { background-position: 30% center; } }
+    h1 { margin-bottom: 0.25rem; padding: 1.5rem; background-color: rgba(176, 196, 222, 0.5); }
+    .subtitle { color: #52606d; margin-top: 0; padding: 1.5rem; background-color: rgba(176, 196, 222, 0.5); }
+    form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin: 1.5rem 0; padding: 1.5rem; background-color: rgba(176, 196, 222, 0.5);}
     label { display: flex; flex-direction: column; font-size: 0.85rem; gap: 0.25rem; }
     label.inline { flex-direction: row; align-items: center; gap: 0.4rem; }
     input[type=text], select { padding: 0.4rem; font-size: 1rem; }
     button { padding: 0.5rem 1.2rem; font-size: 1rem; cursor: pointer; }
-    .card { border: 1px solid #cbd2d9; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+    .card { border: 1px solid #cbd2d9; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.85); }
     .card h2 { margin: 0 0 0.25rem; font-size: 1.15rem; }
     .meta { color: #52606d; font-size: 0.9rem; margin: 0.15rem 0; }
     .badge { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; color: #fff; }

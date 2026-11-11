@@ -85,6 +85,7 @@ class MockProvider(JobProvider):
     ) -> list[JobSummary]:
         """Filter by query/location (case-insensitive substring), then paginate."""
         needle = query.strip().lower()
+        # Query matches title or description; location is a substring match on job.location.
         jobs = [
             job
             for job in self._jobs
@@ -92,4 +93,5 @@ class MockProvider(JobProvider):
             and (location is None or location.lower() in (job.location or "").lower())
         ]
         start = (max(page, 1) - 1) * limit
+        # Return copies so callers cannot mutate the provider's stored jobs.
         return [job.model_copy() for job in jobs[start : start + limit]]

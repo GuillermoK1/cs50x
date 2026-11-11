@@ -81,7 +81,9 @@ async def index(
     }
     status_code = 200
 
+    # query is None on the first page load: render the empty form without searching.
     if query is not None:
+        # Validate input here (the HTML route does not use FastAPI's query validation).
         if not query.strip():
             context["error"] = "Please enter a search query."
             status_code = 400
@@ -89,6 +91,7 @@ async def index(
             context["error"] = f"Unknown source '{source}'."
             status_code = 400
         else:
+            # source is validated above, so the factory receives a supported name.
             provider = provider_factory(source)
             try:
                 context["results"] = await run_search(
@@ -96,6 +99,7 @@ async def index(
                     detector,
                     repository,
                     query=query.strip(),
+                    # Blank location from the form means "no location filter".
                     location=location.strip() if location and location.strip() else None,
                     page=PAGE,
                     limit=LIMIT,
@@ -103,6 +107,7 @@ async def index(
                 )
                 context["searched"] = True
             except ProviderError as exc:
+                # Show the error inside the page instead of raising, keeping the 502 status.
                 context["error"] = provider_error_message(provider, exc)
                 status_code = 502
 

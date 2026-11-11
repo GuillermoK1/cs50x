@@ -26,10 +26,15 @@ async def run_search(
 
     ``ProviderError`` propagates to the caller.
     """
+    # 1. Fetch normalized jobs from the provider.
     jobs = await provider.fetch_jobs(query, location=location, page=page, limit=limit)
+    # 2. Score every job; reports keep the same order as jobs.
     reports = detector.analyze_many(jobs)
+    # 3. Persist all jobs (even suspicious ones) before any filtering.
     await repository.save_results(jobs, reports)
 
+    # 4. Merge each job with its report; zip is strict because both lists must match.
+    # exclude_scams only hides suspicious jobs from the response, not from the database.
     return [
         JobResult(
             **job.model_dump(),

@@ -232,8 +232,10 @@ class ScamDetector:
         for rule in self.rules:
             reason = rule.check(job, now)
             if reason is not None:
+                # Each triggered rule adds a flag and its weight to the score.
                 flags.append(Flag(code=rule.code, reason=reason))
                 score += self.weights.get(rule.code, 0)
+        # Cap at 100; suspicious means reaching the threshold.
         score = min(score, 100)
         return ScamReport(
             job_id=job.id,
@@ -244,6 +246,7 @@ class ScamDetector:
 
     def analyze_many(self, jobs: list[JobSummary]) -> list[ScamReport]:
         """Analyze each job and return the reports in the same order."""
+        # Order matters: callers pair reports with jobs by position.
         return [self.analyze(job) for job in jobs]
 
     def filter(self, jobs: list[JobSummary]) -> list[JobSummary]:

@@ -81,6 +81,12 @@ async def test_index_without_query_renders_form_only(client: httpx.AsyncClient) 
     assert 'class="card"' not in response.text
 
 
+async def test_background_image_is_served(client: httpx.AsyncClient) -> None:
+    response = await client.get("/static/bg-job-search.jpg")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/jpeg"
+
+
 async def test_mock_results_render_scores_and_flags(client: httpx.AsyncClient) -> None:
     response = await client.get("/", params={"query": "e", "source": "mock"})
     assert response.status_code == 200

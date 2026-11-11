@@ -26,6 +26,7 @@ async def search_jobs(
     exclude_scams: bool = False,
 ) -> list[JobResult]:
     """Fetch jobs, score and store all of them, then return them (optionally without scams)."""
+    # Providers, detector and repository are injected so tests can override them.
     try:
         return await run_search(
             provider,
@@ -38,4 +39,5 @@ async def search_jobs(
             exclude_scams=exclude_scams,
         )
     except ProviderError as exc:
+        # Upstream provider failure -> 502 Bad Gateway (not our own error).
         raise HTTPException(status_code=502, detail=provider_error_message(provider, exc)) from exc
