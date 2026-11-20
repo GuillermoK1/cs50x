@@ -39,4 +39,4 @@ Consumes job APIs via the Adapter pattern and filters suspicious listings (scams
 - Live Adzuna test (needs `.env` keys, skips otherwise): `python -m pytest -m live -o addopts="" -s`
 
 ## Run server
-- `uvicorn job_filter.api.main:app --app-dir src --reload` then `GET /jobs/search?query=python&exclude_scams=true` (creates `jobs.db`).
+- `python -m uvicorn job_filter.api.main:app --app-dir src --reload` then `GET /jobs/search?query=python&exclude_scams=true` (creates `jobs.db`).

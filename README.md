@@ -79,10 +79,26 @@ The `mock` source works without any keys. To use Adzuna, put your own `ADZUNA_AP
 Start the server from the project root:
 
 ```
-uvicorn job_filter.api.main:app --app-dir src --reload
+python -m uvicorn job_filter.api.main:app --app-dir src --reload
 ```
 
 Then open `http://127.0.0.1:8000/` in a browser. The first start creates a local `jobs.db` SQLite file.
+
+### Running on cs50.dev
+
+The CS50 codespace already ships Python 3, so no virtual environment is needed. In its terminal:
+
+```
+cd ~
+git clone https://github.com/GuillermoK1/cs50x.git job-filter
+cd job-filter
+pip install -r requirements.txt
+cp .env.example .env
+python -m pytest
+python -m uvicorn job_filter.api.main:app --app-dir src --reload
+```
+
+When VS Code reports that port 8000 is available, click **Open in Browser** (or open the **Ports** tab and click the globe icon next to 8000). The forwarded `https://...-8000.app.github.dev` address replaces `http://127.0.0.1:8000` in the browser; `curl` inside the codespace terminal still uses `127.0.0.1`.
 
 Example JSON request:
 
