@@ -1,6 +1,6 @@
 # Generic Job Listing Filter
 
-#### Video Demo: <VIDEO_URL_HERE>
+#### Video Demo: <https://youtu.be/XEvBH9zx7q4>
 
 ## Description
 
